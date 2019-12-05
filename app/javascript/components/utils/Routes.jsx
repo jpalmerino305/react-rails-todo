@@ -29,7 +29,7 @@ class Routes extends React.Component {
   componentDidMount() {
     console.log('%c=== Mounted: components/utils/Routes ===', 'color: green; font-weight: bold;');
 
-    const { cookies, signin } = this.props;
+    const { cookies, signin, signout } = this.props;
     const access_token = cookies.get('access_token');
 
     if (!_.isEmpty(access_token)) {
@@ -37,19 +37,24 @@ class Routes extends React.Component {
         .then((response) => {
           signin(response.data.user, access_token);
         })
+        .catch((error) => {
+          cookies.remove('access_token');
+          signout();
+        });
     }
   }
 
   // A wrapper for <Route> that redirects to the signin
   // screen if you're not yet authenticated.
   privateRoute({ children, ...rest }) {
-    const { is_signed_in } = this.props;
+    const { cookies, is_signed_in } = this.props;
+    const access_token = cookies.get('access_token');
 
     return (
       <Route
         { ...rest }
         render={({ location }) =>
-          is_signed_in ? (
+          !_.isEmpty(access_token) || is_signed_in ? (
             children
           ) : (
             <Redirect to={{ pathname: '/signin', state: { from: location } }} />
@@ -101,7 +106,8 @@ class Routes extends React.Component {
 Routes.propTypes = {
   cookies: PropTypes.instanceOf(Cookies).isRequired,
   is_signed_in: PropTypes.bool.isRequired,
-  signin: PropTypes.func.isRequired
+  signin: PropTypes.func.isRequired,
+  signout: PropTypes.func.isRequired
 };
 
 export default withCookies(Routes);

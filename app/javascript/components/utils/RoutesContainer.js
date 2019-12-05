@@ -8,7 +8,8 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) => ({
-  signin: (user, access_token) => dispatch(authActions.signin(user, access_token))
+  signin: (user, access_token) => dispatch(authActions.signin(user, access_token)),
+  signout: () => dispatch(authActions.signout())
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(Routes);
