@@ -6,12 +6,15 @@ import {
   Route,
   Redirect
 } from 'react-router-dom';
+import { withCookies, Cookies } from 'react-cookie';
+import axios from 'axios';
+import _ from 'lodash';
 
-import Navigation from '../shared/Navigation';
+import Navigation from '../shared/NavigationContainer';
 
 import HomePage from '../pages/home/IndexPage';
 import TodosPage from '../pages/todos/IndexPage';
-import LoginPage from '../pages/sessions/LoginPage';
+import LoginPage from '../pages/sessions/LoginPageContainer';
 
 class Routes extends React.Component {
 
@@ -25,12 +28,22 @@ class Routes extends React.Component {
 
   componentDidMount() {
     console.log('%c=== Mounted: components/utils/Routes ===', 'color: green; font-weight: bold;');
+
+    const { cookies, signin } = this.props;
+    const access_token = cookies.get('access_token');
+
+    if (!_.isEmpty(access_token)) {
+      axios.get(`/api/v1/sessions?access_type=verify&access_token=${access_token}`)
+        .then((response) => {
+          signin(response.data.user, access_token);
+        })
+    }
   }
 
   // A wrapper for <Route> that redirects to the signin
   // screen if you're not yet authenticated.
   privateRoute({ children, ...rest }) {
-    const { is_signed_in } = this.state;
+    const { is_signed_in } = this.props;
 
     return (
       <Route
@@ -54,28 +67,6 @@ class Routes extends React.Component {
     this.setState({ is_signed_in: false });
   }
 
-  renderAuthButton() {
-    const { is_signed_in } = this.state;
-    let button_text, buttonAction;
-
-    if (is_signed_in) {
-      button_text = 'Signout';
-      buttonAction = this.signout.bind(this);
-    } else {
-      button_text = 'Signin';
-      buttonAction = this.signin.bind(this);
-    }
-
-    return (
-      <React.Fragment>
-        { is_signed_in ? (<Redirect to={{ pathname: '/' }} />) : '' }
-        { is_signed_in ? (<div style={{ color: 'green', display: 'inline-block', fontWeight: 'bold', marginRight: '10px' }}>Welcome!</div>) : '' }
-
-        <button onClick={buttonAction}>{button_text}</button>
-      </React.Fragment>
-    );
-  }
-
   render () {
     const PrivateRoute = this.privateRoute.bind(this);
     const { is_signed_in } = this.state;
@@ -85,7 +76,6 @@ class Routes extends React.Component {
         <div>
 
           <Navigation />
-          { this.renderAuthButton() }
 
           <Switch>
             <PrivateRoute path="/todos">
@@ -109,6 +99,9 @@ class Routes extends React.Component {
 }
 
 Routes.propTypes = {
+  cookies: PropTypes.instanceOf(Cookies).isRequired,
+  is_signed_in: PropTypes.bool.isRequired,
+  signin: PropTypes.func.isRequired
 };
 
-export default Routes;
+export default withCookies(Routes);

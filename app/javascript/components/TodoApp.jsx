@@ -1,7 +1,22 @@
 import React from 'react';
-import PropTypes from 'prop-types';
+import { Provider } from 'react-redux';
+import { applyMiddleware, createStore, combineReducers, compose } from 'redux';
+import thunk from 'redux-thunk';
+import { composeWithDevTools } from 'redux-devtools-extension'; // For development purposes only
 
-import Routes from './utils/Routes';
+import Routes from './utils/RoutesContainer';
+
+import authReducer from '../redux/reducers/authReducer';
+
+const middlewares = [thunk];
+
+const rootReducer = combineReducers({
+  auth: authReducer
+});
+
+// Install "Redux DevTools" chrome extension to inspect state inside redux store
+const composeEnhancers = (process.env.RAILS_ENV === 'development') ? composeWithDevTools : compose;
+const store = composeEnhancers(applyMiddleware(...middlewares))(createStore)(rootReducer);
 
 class TodoApp extends React.Component {
 
@@ -11,7 +26,9 @@ class TodoApp extends React.Component {
 
   render () {
     return (
-      <Routes />
+      <Provider store={store}>
+        <Routes />
+      </Provider>
     );
 
   }
