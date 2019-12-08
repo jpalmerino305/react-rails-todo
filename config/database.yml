@@ -47,8 +47,11 @@ test:
 #   production:
 #     url: <%= ENV['DATABASE_URL'] %>
 #
+# production:
+#   <<: *default
+#   database: react_rails_todo_production
+#   username: react_rails_todo
+#   password: <%= ENV['REACT_RAILS_TODO_DATABASE_PASSWORD'] %>
+
 production:
-  <<: *default
-  database: react_rails_todo_production
-  username: react_rails_todo
-  password: <%= ENV['REACT_RAILS_TODO_DATABASE_PASSWORD'] %>
+  url: <%= ENV['DATABASE_URL'] %>
