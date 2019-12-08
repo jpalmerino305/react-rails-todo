@@ -27,10 +27,12 @@ class LoginPage extends React.Component {
 
     axios.post('/api/v1/sessions', { email: email, password: password })
       .then((response) => {
-        let status = response.status, access_token = response.data.access_token;
+        const status = response.statu;
+        const access_token = response.data.access_token;
+        const user = response.data.user;
 
         cookies.set('access_token', access_token);
-        signin({ email: email }, access_token);
+        signin(user, access_token);
         history.replace(from);
       });
   }

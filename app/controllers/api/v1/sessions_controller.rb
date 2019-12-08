@@ -29,7 +29,7 @@ class Api::V1::SessionsController < ApplicationController
 
       user = User.where(email: email, api_authentication_token: api_authentication_token).first!
 
-      render json: { user: user.as_json(only: [:email]) } and return
+      render json: { user: user_details(user) } and return
     end
 
     head :no_content
@@ -39,10 +39,16 @@ class Api::V1::SessionsController < ApplicationController
     user = User.find_by(email: params[:email])
     if user&.valid_password?(params[:password])
       token = Utils::JasonWebToken.encode({ email: user.email, api_authentication_token: user.api_authentication_token })
-      render json: { access_token: token }, status: :created
+      render json: { access_token: token, user: user_details(user) }, status: :created
     else
       render json: { message: "Unauthorized" }, status: :unauthorized
     end
+  end
+
+  private
+
+  def user_details user
+    user.as_json(only: [:id, :email])
   end
 
 end

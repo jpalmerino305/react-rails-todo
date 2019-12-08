@@ -11,7 +11,8 @@ class ApiAccessTokenStrategy < Warden::Strategies::Base
     user = User.where(email: email, api_authentication_token: api_authentication_token).first
 
     if user
-      success!(user)
+      # success!(user)
+      success!(user, store: false) # Attempt to disable login session storage
     else
       fail!('Invalid email or password')
     end
@@ -20,6 +21,7 @@ class ApiAccessTokenStrategy < Warden::Strategies::Base
   private
 
   def user_details
+    # Header: Authorization = Bearer <access_token>
     access_token = env['HTTP_AUTHORIZATION'].to_s.remove('Bearer ')
 
     decoded = Utils::JasonWebToken.decode(access_token)

@@ -4,6 +4,8 @@ class User < ApplicationRecord
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
 
+  has_many :todos
+
   before_create :set_api_authentication_token
 
   def set_api_authentication_token

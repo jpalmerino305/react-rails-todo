@@ -8,4 +8,9 @@
 
 user = User.find_or_initialize_by(email: "jp.almerino305@gmail.com")
 user.password = "1234567890"
+user.todos << Todo.find_or_initialize_by(name: "Hit the gym")
+user.todos << Todo.find_or_initialize_by(name: "Buy snacks")
+user.todos << Todo.find_or_initialize_by(name: "Bike")
+user.todos << Todo.find_or_initialize_by(name: "Hike")
+user.todos << Todo.find_or_initialize_by(name: "Swim")
 user.save!

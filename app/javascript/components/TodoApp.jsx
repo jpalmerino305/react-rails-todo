@@ -7,11 +7,13 @@ import { composeWithDevTools } from 'redux-devtools-extension'; // For developme
 import Routes from './utils/RoutesContainer';
 
 import authReducer from '../redux/reducers/authReducer';
+import todoReducer from '../redux/reducers/todoReducer';
 
 const middlewares = [thunk];
 
 const rootReducer = combineReducers({
-  auth: authReducer
+  auth: authReducer,
+  todo: todoReducer
 });
 
 // Install "Redux DevTools" chrome extension to inspect state inside redux store
