@@ -15,7 +15,7 @@ module Utils
     end
 
     def self.secret
-      Rails.application.secrets.secret_key_base
+      Rails.application.credentials[Rails.env.to_sym][:secret_key_base]
     end
 
   end
