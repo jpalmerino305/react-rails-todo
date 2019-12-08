@@ -22,16 +22,13 @@ class IndexPage extends React.Component {
     console.log('%c=== Mounted: components/pages/todos/IndexPage ===', 'color: green; font-weight: bold;');
 
     const {
-      cookies,
       loading,
       todos,
       setLoading,
       setTodos,
     } = this.props;
 
-    const access_token = cookies.get('access_token');
-
-    axios.get('/api/v1/users/1/todos', { headers: { Authorization: "Bearer " + access_token } })
+    axios.get('/api/v1/users/1/todos')
       .then((response) => {
         setTodos(response.data.todos);
       });
@@ -43,16 +40,10 @@ class IndexPage extends React.Component {
 
     todo.completed = event.target.checked;
 
-    axios.put(`/api/v1/users/${currentUser.id}/todos/${todo.id}`, { todo: todo }, { headers: { Authorization: "Bearer " + access_token } })
+    axios.put(`/api/v1/users/${currentUser.id}/todos/${todo.id}`, { todo: todo })
       .then((response) => {
         updateTodo(todo);
       })
-      .catch((error) => {
-        if (error.response.status === 401) {
-          cookies.remove('access_token');
-          signout();
-        }
-      });
   }
 
   handleDelete(todo, event) {
@@ -63,16 +54,9 @@ class IndexPage extends React.Component {
       return false;
     }
 
-    axios.delete(`/api/v1/users/${currentUser.id}/todos/${todo.id}`, { headers: { Authorization: "Bearer " + access_token } })
+    axios.delete(`/api/v1/users/${currentUser.id}/todos/${todo.id}`)
       .then((response) => {
         deleteTodo(todo);
-      })
-      .catch((error) => {
-        console.log('error.response = ', error.response)
-        if (error.response.status === 401) {
-          cookies.remove('access_token');
-          signout();
-        }
       });
   }
 
@@ -97,24 +81,16 @@ class IndexPage extends React.Component {
   handleUpdate(todo, event){
     const { ids_to_edit } = this.state;
     const { cookies, currentUser, updateTodo } = this.props;
-    const access_token = cookies.get('access_token');
 
     let input = document.getElementById(`edit-field-${todo.id}`);
     todo.name = input.value;
 
-    axios.put(`/api/v1/users/${currentUser.id}/todos/${todo.id}`, { todo: { name: todo.name } }, { headers: { Authorization: "Bearer " + access_token } })
+    axios.put(`/api/v1/users/${currentUser.id}/todos/${todo.id}`, { todo: { name: todo.name } })
       .then((response) => {
         updateTodo(todo);
         this.setState({
           ids_to_edit: ids_to_edit.filter(id => id !== todo.id)
         })
-      })
-      .catch((error) => {
-        console.log('error.response = ', error.response)
-        if (error.response.status === 401) {
-          cookies.remove('access_token');
-          signout();
-        }
       });
   }
 
@@ -187,19 +163,10 @@ class IndexPage extends React.Component {
     const { addTodo, cookies, currentUser } = this.props;
     const access_token = cookies.get('access_token');
 
-
-    axios.post(`/api/v1/users/${currentUser.id}/todos`, { todo: {  name: todo_name, completed: false } }, { headers: { Authorization: "Bearer " + access_token } })
+    axios.post(`/api/v1/users/${currentUser.id}/todos`, { todo: {  name: todo_name, completed: false } })
       .then((response) => {
         addTodo(response.data);
-        console.log('response = ', response);
-
         this.setState({ todo_name: '' });
-      })
-      .catch((error) => {
-        if (error.response.status === 401) {
-          cookies.remove('access_token');
-          signout();
-        }
       });
   }
 

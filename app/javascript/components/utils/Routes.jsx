@@ -23,13 +23,15 @@ class Routes extends React.Component {
 
     this.state = {
       is_signed_in: false
-    }
+    };
+
+    this.axiosInterceptors();
   }
 
   componentDidMount() {
     console.log('%c=== Mounted: components/utils/Routes ===', 'color: green; font-weight: bold;');
 
-    const { cookies, signin, signout } = this.props;
+    const { cookies, signin } = this.props;
     const access_token = cookies.get('access_token');
 
     if (!_.isEmpty(access_token)) {
@@ -38,10 +40,42 @@ class Routes extends React.Component {
           signin(response.data.user, access_token);
         })
         .catch((error) => {
-          cookies.remove('access_token');
-          signout();
+          this.handleSignout();
         });
     }
+  }
+
+  axiosInterceptors() {
+    const { cookies, is_signed_in } = this.props;
+    const access_token = cookies.get('access_token');
+
+    axios.interceptors.request.use((config) => {
+        if (!_.isEmpty(access_token)) {
+          config.headers['Authorization'] = `Bearer ${access_token}`
+        }
+
+        return config;
+      }, (error) => {
+        return Promise.reject(error);
+      });
+
+    axios.interceptors.response.use((response) => {
+        return response;
+      }, (error) => {
+        let status = error.response.status;
+
+        if (!_.isEmpty(access_token) && status === 401) {
+          this.handleSignout();
+        }
+
+        return Promise.reject(error);
+      });
+  }
+
+  handleSignout() {
+    const { cookies, signout } = this.props;
+    signout();
+    cookies.remove('access_token');
   }
 
   // A wrapper for <Route> that redirects to the signin
@@ -64,17 +98,8 @@ class Routes extends React.Component {
     );
   }
 
-  signin() {
-    this.setState({ is_signed_in: true });
-  }
-
-  signout() {
-    this.setState({ is_signed_in: false });
-  }
-
   render () {
     const PrivateRoute = this.privateRoute.bind(this);
-    const { is_signed_in } = this.state;
 
     return (
       <Router>
