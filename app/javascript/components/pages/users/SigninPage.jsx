@@ -4,7 +4,7 @@ import { Redirect, withRouter } from 'react-router-dom';
 import { withCookies, Cookies } from 'react-cookie';
 import axios from 'axios';
 
-class LoginPage extends React.Component {
+class SigninPage extends React.Component {
 
   constructor(props) {
     super(props);
@@ -16,7 +16,7 @@ class LoginPage extends React.Component {
   }
 
   componentDidMount(){
-    console.log('%c=== Mounted: components/pages/sessions/LoginPage ===', 'color: green; font-weight: bold;');
+    console.log('%c=== Mounted: components/pages/sessions/SigninPage ===', 'color: green; font-weight: bold;');
   }
 
   handleSignin(e){
@@ -71,10 +71,10 @@ class LoginPage extends React.Component {
 
 }
 
-LoginPage.propTypes = {
+SigninPage.propTypes = {
   cookies: PropTypes.instanceOf(Cookies).isRequired,
   is_signed_in: PropTypes.bool.isRequired,
   signin: PropTypes.func.isRequired
 };
 
-export default withCookies(withRouter(LoginPage));
+export default withCookies(withRouter(SigninPage));

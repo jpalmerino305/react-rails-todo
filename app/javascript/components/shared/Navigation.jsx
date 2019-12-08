@@ -42,9 +42,14 @@ class Navigation extends React.Component {
                 <Link to="#" onClick={this.signout.bind(this)}>Signout</Link>
               </li>
             ) : (
-              <li>
-                <Link to="/signin">Signin</Link>
-              </li>
+              <React.Fragment>
+                <li>
+                  <Link to="/signin">Signin</Link>
+                </li>
+                <li>
+                  <Link to="/signup">Signup</Link>
+                </li>
+              </React.Fragment>
             )
           }
         </ul>

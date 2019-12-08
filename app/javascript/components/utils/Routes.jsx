@@ -14,7 +14,8 @@ import Navigation from '../shared/NavigationContainer';
 
 import HomePage from '../pages/home/IndexPage';
 import TodosPage from '../pages/todos/IndexPageContainer';
-import LoginPage from '../pages/sessions/LoginPageContainer';
+import SigninPage from '../pages/users/SigninPageContainer';
+import SignupPage from '../pages/users/SignupPageContainer';
 
 class Routes extends React.Component {
 
@@ -84,7 +85,10 @@ class Routes extends React.Component {
             </PrivateRoute>
 
             <Route path="/signin">
-              <LoginPage />
+              <SigninPage />
+            </Route>
+            <Route path="/signup">
+              <SignupPage />
             </Route>
             <Route path="/">
               <HomePage />
