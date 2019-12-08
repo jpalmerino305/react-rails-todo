@@ -13,7 +13,7 @@ import _ from 'lodash';
 import Navigation from '../shared/NavigationContainer';
 
 import HomePage from '../pages/home/IndexPage';
-import TodosPage from '../pages/todos/IndexPage';
+import TodosPage from '../pages/todos/IndexPageContainer';
 import LoginPage from '../pages/sessions/LoginPageContainer';
 
 class Routes extends React.Component {

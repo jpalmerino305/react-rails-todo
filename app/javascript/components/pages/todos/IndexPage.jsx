@@ -5,6 +5,8 @@ import { withCookies, Cookies } from 'react-cookie';
 import axios from 'axios';
 import _ from 'lodash';
 
+import styles from './IndexPageStyles.module.css';
+
 class IndexPage extends React.Component {
 
   constructor(props) {
