@@ -24,8 +24,6 @@ class Routes extends React.Component {
     this.state = {
       is_signed_in: false
     };
-
-    this.axiosInterceptors();
   }
 
   componentDidMount() {
@@ -43,33 +41,6 @@ class Routes extends React.Component {
           this.handleSignout();
         });
     }
-  }
-
-  axiosInterceptors() {
-    const { cookies, is_signed_in } = this.props;
-    const access_token = cookies.get('access_token');
-
-    axios.interceptors.request.use((config) => {
-        if (!_.isEmpty(access_token)) {
-          config.headers['Authorization'] = `Bearer ${access_token}`
-        }
-
-        return config;
-      }, (error) => {
-        return Promise.reject(error);
-      });
-
-    axios.interceptors.response.use((response) => {
-        return response;
-      }, (error) => {
-        let status = error.response.status;
-
-        if (!_.isEmpty(access_token) && status === 401) {
-          this.handleSignout();
-        }
-
-        return Promise.reject(error);
-      });
   }
 
   handleSignout() {

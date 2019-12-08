@@ -12,13 +12,15 @@ class IndexPage extends React.Component {
   constructor(props) {
     super(props);
 
+    this.api = this.axiosApiV1Instance();
+
     this.state = {
       ids_to_edit: [],
       todo_name: ''
-    }
+    };
   }
 
-  componentDidMount(){
+  componentDidMount() {
     console.log('%c=== Mounted: components/pages/todos/IndexPage ===', 'color: green; font-weight: bold;');
 
     const {
@@ -28,44 +30,54 @@ class IndexPage extends React.Component {
       setTodos,
     } = this.props;
 
-    axios.get('/api/v1/users/1/todos')
-      .then((response) => {
-        setTodos(response.data.todos);
+    setTodos([]);
+    this.api.get('/users/1/todos').then((response) => { setTodos(response.data.todos) });
+  }
+
+  axiosApiV1Instance() {
+    const { cookies, signout } = this.props;
+
+    let api = axios.create({
+      baseURL: '/api/v1',
+      timeout: 1000,
+      headers: { 'Authorization': 'Bearer ' + cookies.get('access_token') }
+    });
+
+    api.interceptors.response.use((response) => {
+        return response;
+      }, (error) => {
+        let status = error.response.status;
+
+        if (status === 401) {
+          signout();
+          cookies.remove('access_token');
+        }
+
+        return Promise.reject(error);
       });
+
+    return api;
   }
 
   handleCompletedChange(todo, event) {
-    const { cookies, currentUser, signout, updateTodo } = this.props;
-    const access_token = cookies.get('access_token');
+    const { currentUser, updateTodo } = this.props;
 
-    todo.completed = event.target.checked;
-
-    axios.put(`/api/v1/users/${currentUser.id}/todos/${todo.id}`, { todo: todo })
-      .then((response) => {
-        updateTodo(todo);
-      })
+    this.api.put(`/users/${currentUser.id}/todos/${todo.id}`, { todo: { ...todo, completed: event.target.checked } }).then((response) => { updateTodo(todo) });
   }
 
   handleDelete(todo, event) {
-    const { cookies, currentUser, deleteTodo, signout } = this.props;
-    const access_token = cookies.get('access_token');
+    const { currentUser, deleteTodo } = this.props;
 
     if (!confirm('Are you sure?')) {
       return false;
     }
 
-    axios.delete(`/api/v1/users/${currentUser.id}/todos/${todo.id}`)
-      .then((response) => {
-        deleteTodo(todo);
-      });
+    this.api.delete(`/users/${currentUser.id}/todos/${todo.id}`).then((response) => { deleteTodo(todo) });
   }
 
   handleCancelEdit(todo, event){
     const { ids_to_edit } = this.state;
-
-    this.setState({
-      ids_to_edit: ids_to_edit.filter(id => id !== todo.id)
-    })
+    this.setState({ ids_to_edit: ids_to_edit.filter(id => id !== todo.id) });
   }
 
   handleEdit(todo, event){
@@ -73,25 +85,59 @@ class IndexPage extends React.Component {
     if (ids_to_edit.includes(todo.id)) {
       return false;
     }
-    this.setState({
-      ids_to_edit: [...ids_to_edit, todo.id]
-    })
+    this.setState({ ids_to_edit: [...ids_to_edit, todo.id] });
   }
 
   handleUpdate(todo, event){
     const { ids_to_edit } = this.state;
-    const { cookies, currentUser, updateTodo } = this.props;
+    const { currentUser, updateTodo } = this.props;
 
     let input = document.getElementById(`edit-field-${todo.id}`);
     todo.name = input.value;
 
-    axios.put(`/api/v1/users/${currentUser.id}/todos/${todo.id}`, { todo: { name: todo.name } })
+    this.api.put(`/users/${currentUser.id}/todos/${todo.id}`, { todo: { name: todo.name } })
       .then((response) => {
         updateTodo(todo);
         this.setState({
           ids_to_edit: ids_to_edit.filter(id => id !== todo.id)
         })
       });
+  }
+
+  handleInputChange(event) {
+    const target = event.target;
+    const name = target.name;
+    const value = target.value;
+
+    this.setState({
+      [name]: value
+    });
+  }
+
+  handleSaveTodo(event){
+    event.preventDefault();
+    const { todo_name } = this.state;
+    const { addTodo, cookies, currentUser } = this.props;
+    const access_token = cookies.get('access_token');
+
+    this.api.post(`/users/${currentUser.id}/todos`, { todo: {  name: todo_name, completed: false } })
+      .then((response) => {
+        addTodo(response.data);
+        this.setState({ todo_name: '' });
+      });
+  }
+
+  renderTodoForm() {
+    const { todo_name } = this.state;
+
+    return (
+      <React.Fragment>
+        <form onSubmit={this.handleSaveTodo.bind(this)}>
+          <input type="text" name="todo_name" placeholder="Todo Name" onChange={ this.handleInputChange.bind(this) } value={todo_name} />
+          <button type="submit">Add</button>
+        </form>
+      </React.Fragment>
+    );
   }
 
   renderTodoList(){
@@ -143,42 +189,6 @@ class IndexPage extends React.Component {
             }
           </tbody>
         </table>
-      </React.Fragment>
-    );
-  }
-
-  handleInputChange(event) {
-    const target = event.target;
-    const name = target.name;
-    const value = target.value;
-
-    this.setState({
-      [name]: value
-    });
-  }
-
-  handleSaveTodo(event){
-    event.preventDefault();
-    const { todo_name } = this.state;
-    const { addTodo, cookies, currentUser } = this.props;
-    const access_token = cookies.get('access_token');
-
-    axios.post(`/api/v1/users/${currentUser.id}/todos`, { todo: {  name: todo_name, completed: false } })
-      .then((response) => {
-        addTodo(response.data);
-        this.setState({ todo_name: '' });
-      });
-  }
-
-  renderTodoForm() {
-    const { todo_name } = this.state;
-
-    return (
-      <React.Fragment>
-        <form onSubmit={this.handleSaveTodo.bind(this)}>
-          <input type="text" name="todo_name" placeholder="Todo Name" onChange={ this.handleInputChange.bind(this) } value={todo_name} />
-          <button type="submit">Add</button>
-        </form>
       </React.Fragment>
     );
   }

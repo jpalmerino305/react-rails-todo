@@ -3,7 +3,7 @@ class Api::V1::TodosController < Api::V1::SecuredController
   before_action :set_todo, only: [:show, :update, :destroy]
 
   def index
-    @todos = User.find(params[:user_id]).todos
+    @todos = current_user.todos
   end
 
   def show

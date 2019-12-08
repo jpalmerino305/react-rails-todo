@@ -27,7 +27,6 @@ class LoginPage extends React.Component {
 
     axios.post('/api/v1/sessions', { email: email, password: password })
       .then((response) => {
-        const status = response.statu;
         const access_token = response.data.access_token;
         const user = response.data.user;
 
