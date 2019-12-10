@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
+  Route,
   withRouter
 } from 'react-router-dom';
 import { withCookies, Cookies } from 'react-cookie';
@@ -40,8 +41,17 @@ class ProtectedRoute extends React.Component {
       });
   }
 
+  componentDidUpdate(prevProps) {
+    const { cookies, history, is_signed_in, location } = this.props;
+    const access_token = cookies.get('access_token');
+
+    if (_.isEmpty(access_token) && !is_signed_in) {
+      history.push('/signin', { from: location });
+    }
+  }
+
   render () {
-    const { is_signed_in, children } = this.props;
+    const { is_signed_in, children, ...props } = this.props;
 
     if (!is_signed_in) {
       return (
@@ -52,7 +62,7 @@ class ProtectedRoute extends React.Component {
     }
 
     return (
-      <div apiv1={'apiv1'}>{children}</div>
+      <Route { ...props }>{children}</Route>
     );
   }
 

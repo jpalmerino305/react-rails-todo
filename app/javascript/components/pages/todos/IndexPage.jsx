@@ -22,7 +22,6 @@ class IndexPage extends React.Component {
 
   componentDidMount() {
     console.log('%c=== Mounted: components/pages/todos/IndexPage ===', 'color: green; font-weight: bold;');
-    console.log('props = ', this.props);
 
     const {
       loading,
@@ -62,17 +61,14 @@ class IndexPage extends React.Component {
 
   handleCompletedChange(todo, event) {
     const { currentUser, updateTodo } = this.props;
+    todo = { ...todo, completed: event.target.checked };
 
-    this.api.put(`/users/${currentUser.id}/todos/${todo.id}`, { todo: { ...todo, completed: event.target.checked } }).then((response) => { updateTodo(todo) });
+    this.api.put(`/users/${currentUser.id}/todos/${todo.id}`, { todo: todo }).then((response) => { updateTodo(todo) });
   }
 
   handleDelete(todo, event) {
     const { currentUser, deleteTodo } = this.props;
-
-    if (!confirm('Are you sure?')) {
-      return false;
-    }
-
+    if (!confirm('Are you sure?')) return false;
     this.api.delete(`/users/${currentUser.id}/todos/${todo.id}`).then((response) => { deleteTodo(todo) });
   }
 
@@ -151,59 +147,56 @@ class IndexPage extends React.Component {
 
     return (
       <React.Fragment>
-        <div className="col-lg-6">
+        <div className="container" style={{ marginTop: '20px' }}>
+          <div className="row">
+            <div className="col-lg-6 offset-lg-3">
 
-          <div className="card">
-            <div className="card-body">
+              <div className="card">
+                <div className="card-body">
 
-              { this.renderTodoForm() }
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th></th>
-                    <th>Todo</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {
-                    todos.map((todo) => (
-                      <tr key={todo.id}>
-                        <td className="text-right">
-                          <input type="checkbox" id={`todo-${todo.id}`} defaultChecked={todo.completed} onChange={this.handleCompletedChange.bind(this, todo)} />
-                        </td>
-                        <td>
-                          {
-                            ids_to_edit.includes(todo.id) ? (
-                              <React.Fragment>
-                                <input type="text" className="form-control" id={`edit-field-${todo.id}`} defaultValue={todo.name} style={{ marginBottom: '5px' }} />
-                                <button className="btn btn-outline-success btn-sm" onClick={this.handleUpdate.bind(this, todo)}>Save</button>
-                                &nbsp;
-                                <button className="btn btn-outline-secondary btn-sm" onClick={this.handleCancelEdit.bind(this, todo)}>Cancel</button>
-                              </React.Fragment>
-                            ) : (
-                              <label htmlFor={`todo-${todo.id}`} className={ todo.completed ? styles.completed : '' }>{todo.name}</label>
-                            )
-                          }
-                        </td>
-                        <td className="text-right">
-                          {
-                            ids_to_edit.includes(todo.id) ? '' : (
-                              <React.Fragment>
-                                <button className="btn btn-outline-secondary btn-sm" disabled={todo.completed} onClick={this.handleEdit.bind(this, todo)}>Edit</button>
-                                &nbsp;
-                                <button className="btn btn-outline-danger btn-sm" onClick={this.handleDelete.bind(this, todo)}>Delete</button>
-                              </React.Fragment>
-                            )
-                          }
-                        </td>
-                      </tr>
-                    ))
-                  }
-                </tbody>
-              </table>
+                  { this.renderTodoForm() }
+                  <table className="table">
+                    <tbody>
+                      {
+                        todos.map((todo) => (
+                          <tr key={todo.id}>
+                            <td className="text-right">
+                              <input type="checkbox" id={`todo-${todo.id}`} defaultChecked={todo.completed} onChange={this.handleCompletedChange.bind(this, todo)} />
+                            </td>
+                            <td>
+                              {
+                                ids_to_edit.includes(todo.id) ? (
+                                  <React.Fragment>
+                                    <input type="text" className="form-control" id={`edit-field-${todo.id}`} defaultValue={todo.name} style={{ marginBottom: '5px' }} />
+                                    <button className="btn btn-outline-success btn-sm" onClick={this.handleUpdate.bind(this, todo)}>Save</button>
+                                    &nbsp;
+                                    <button className="btn btn-outline-secondary btn-sm" onClick={this.handleCancelEdit.bind(this, todo)}>Cancel</button>
+                                  </React.Fragment>
+                                ) : (
+                                  <label htmlFor={`todo-${todo.id}`} className={ todo.completed ? styles.completed : '' }>{todo.name}</label>
+                                )
+                              }
+                            </td>
+                            <td className="text-right">
+                              {
+                                ids_to_edit.includes(todo.id) ? '' : (
+                                  <React.Fragment>
+                                    <button className="btn btn-outline-secondary btn-sm" disabled={todo.completed} onClick={this.handleEdit.bind(this, todo)}>Edit</button>
+                                    &nbsp;
+                                    <button className="btn btn-outline-danger btn-sm" onClick={this.handleDelete.bind(this, todo)}>Delete</button>
+                                  </React.Fragment>
+                                )
+                              }
+                            </td>
+                          </tr>
+                        ))
+                      }
+                    </tbody>
+                  </table>
 
-            </div> 
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </React.Fragment>

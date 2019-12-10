@@ -10,8 +10,8 @@ class SigninPage extends React.Component {
     super(props);
 
     this.state = {
-      email: 'jp.almerino305@gmail.com',
-      password: '1234567890'
+      email: '',
+      password: ''
     }
   }
 
@@ -53,18 +53,24 @@ class SigninPage extends React.Component {
     return (
       <React.Fragment>
         { is_signed_in ? (<Redirect to={{ pathname: '/' }} />) : '' }
-
-       <form onSubmit={ this.handleSignin.bind(this) }>
-          <div>
-            <input type="email" name="email" placeholder="Email" onChange={ this.handleInputChange.bind(this) } value={email} />
+        <div className="container">
+          <div className="row">
+            <div className="col-lg-4 offset-lg-4" style={{ marginTop: '50px' }}>
+              <img src="//ssl.gstatic.com/accounts/ui/avatar_2x.png" className="mx-auto d-block rounded-circle" width="100" style={{ marginBottom: '20px' }} />
+              <form onSubmit={ this.handleSignin.bind(this) }>
+                <div className="form-group">
+                  <input type="email" name="email" className="form-control" placeholder="Email" onChange={ this.handleInputChange.bind(this) } value={email} />
+                </div>
+                <div className="form-group">
+                  <input type="password" name="password" className="form-control" placeholder="Password" onChange={ this.handleInputChange.bind(this) } value={password} />
+                </div>
+                <div className="form-group">
+                  <button type="submit" className="btn btn-secondary btn-block">Login</button>
+                </div>
+              </form>
+            </div>
           </div>
-          <div>
-            <input type="password" name="password" placeholder="Password" onChange={ this.handleInputChange.bind(this) } value={password} />
-          </div>
-          <div>
-            <button type="submit">Login</button>
-          </div>
-        </form>
+        </div>
       </React.Fragment>
     );
   }
