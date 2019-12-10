@@ -18,7 +18,7 @@ class Navigation extends React.Component {
     cookies.remove('access_token');
   }
 
-  render () {
+  render2 () {
     const { currentUser, is_signed_in } = this.props;
 
     return (
@@ -53,6 +53,64 @@ class Navigation extends React.Component {
             )
           }
         </ul>
+      </React.Fragment>
+    );
+  }
+
+  render () {
+    const { currentUser, is_signed_in } = this.props;
+
+    return (
+      <React.Fragment>
+        <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+          <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false" aria-label="Toggle navigation">
+            <span className="navbar-toggler-icon"></span>
+          </button>
+
+          <div className="collapse navbar-collapse" id="main-navbar">
+            <ul className="navbar-nav mr-auto">
+              <li>
+                <Link to="/" className="nav-link">Home</Link>
+              </li>
+              <li>
+                <Link to="/todos" className="nav-link">Todos</Link>
+              </li>
+            </ul>
+
+            <ul className="navbar-nav">
+              {
+                is_signed_in ? (
+                  <li>
+                    <Link to="#" className="nav-link" onClick={this.signout.bind(this)}>Signout</Link>
+                  </li>
+                ) : (
+                  <React.Fragment>
+                    <li>
+                      <Link to="/signin" className="nav-link">Signin</Link>
+                    </li>
+                    <li>
+                      <Link to="/signup" className="nav-link">Signup</Link>
+                    </li>
+                  </React.Fragment>
+                )
+              }
+              {
+                is_signed_in && !_.isEmpty(currentUser) ? (
+                  <li className="nav-item dropdown">
+                      <a className="nav-link dropdown-toggle" href="http://example.com" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        {currentUser.email}
+                      </a>
+                      <div className="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                          <a className="dropdown-item" href="#">Action</a>
+                          <a className="dropdown-item" href="#">Another action</a>
+                      </div>
+                  </li>
+                ) : ''
+              }
+            </ul>
+          </div>
+        </nav>
+
       </React.Fragment>
     );
   }

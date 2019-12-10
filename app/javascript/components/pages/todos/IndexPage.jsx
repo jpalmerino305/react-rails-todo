@@ -22,6 +22,7 @@ class IndexPage extends React.Component {
 
   componentDidMount() {
     console.log('%c=== Mounted: components/pages/todos/IndexPage ===', 'color: green; font-weight: bold;');
+    console.log('props = ', this.props);
 
     const {
       loading,
@@ -133,8 +134,12 @@ class IndexPage extends React.Component {
     return (
       <React.Fragment>
         <form onSubmit={this.handleSaveTodo.bind(this)}>
-          <input type="text" name="todo_name" placeholder="Todo Name" onChange={ this.handleInputChange.bind(this) } value={todo_name} />
-          <button type="submit">Add</button>
+          <div className="input-group mb-3">
+            <input type="text" name="todo_name" className="form-control" placeholder="Todo" aria-label="Todo" aria-describedby="basic-addon2" onChange={ this.handleInputChange.bind(this) } value={todo_name} />
+            <div className="input-group-append">
+              <button className="btn btn-success" type="submit">Add</button>
+            </div>
+          </div>
         </form>
       </React.Fragment>
     );
@@ -146,49 +151,61 @@ class IndexPage extends React.Component {
 
     return (
       <React.Fragment>
-        <table>
-          <thead>
-            <tr>
-              <th>Todo</th>
-              <th>&nbsp;</th>
-            </tr>
-          </thead>
-          <tbody>
-            {
-              todos.map((todo) => (
-                <tr key={todo.id}>
-                  <td>
-                    <input type="checkbox" id={`todo-${todo.id}`} defaultChecked={todo.completed} onChange={this.handleCompletedChange.bind(this, todo)} />
-                    {
-                      ids_to_edit.includes(todo.id) ? (
-                        <input type="text" id={`edit-field-${todo.id}`} defaultValue={todo.name} />
-                      ) : (
-                        <label htmlFor={`todo-${todo.id}`} className={ todo.completed ? styles.completed : '' }>{todo.name}</label>
-                      )
-                    }
-                  </td>
-                  <td>
-                    {
-                      ids_to_edit.includes(todo.id) ? (
-                        <React.Fragment>
-                          <button onClick={this.handleUpdate.bind(this, todo)}>Save</button>
-                          &nbsp;
-                          <button onClick={this.handleCancelEdit.bind(this, todo)}>Cancel</button>
-                        </React.Fragment>
-                      ) : (
-                        <React.Fragment>
-                          <button disabled={todo.completed} onClick={this.handleEdit.bind(this, todo)}>Edit</button>
-                          &nbsp;
-                          <button onClick={this.handleDelete.bind(this, todo)} className="btn">Delete</button>
-                        </React.Fragment>
-                      )
-                    }
-                  </td>
-                </tr>
-              ))
-            }
-          </tbody>
-        </table>
+        <div className="col-lg-6">
+
+          <div className="card">
+            <div className="card-body">
+
+              { this.renderTodoForm() }
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>Todo</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {
+                    todos.map((todo) => (
+                      <tr key={todo.id}>
+                        <td className="text-right">
+                          <input type="checkbox" id={`todo-${todo.id}`} defaultChecked={todo.completed} onChange={this.handleCompletedChange.bind(this, todo)} />
+                        </td>
+                        <td>
+                          {
+                            ids_to_edit.includes(todo.id) ? (
+                              <React.Fragment>
+                                <input type="text" className="form-control" id={`edit-field-${todo.id}`} defaultValue={todo.name} style={{ marginBottom: '5px' }} />
+                                <button className="btn btn-outline-success btn-sm" onClick={this.handleUpdate.bind(this, todo)}>Save</button>
+                                &nbsp;
+                                <button className="btn btn-outline-secondary btn-sm" onClick={this.handleCancelEdit.bind(this, todo)}>Cancel</button>
+                              </React.Fragment>
+                            ) : (
+                              <label htmlFor={`todo-${todo.id}`} className={ todo.completed ? styles.completed : '' }>{todo.name}</label>
+                            )
+                          }
+                        </td>
+                        <td className="text-right">
+                          {
+                            ids_to_edit.includes(todo.id) ? '' : (
+                              <React.Fragment>
+                                <button className="btn btn-outline-secondary btn-sm" disabled={todo.completed} onClick={this.handleEdit.bind(this, todo)}>Edit</button>
+                                &nbsp;
+                                <button className="btn btn-outline-danger btn-sm" onClick={this.handleDelete.bind(this, todo)}>Delete</button>
+                              </React.Fragment>
+                            )
+                          }
+                        </td>
+                      </tr>
+                    ))
+                  }
+                </tbody>
+              </table>
+
+            </div> 
+          </div>
+        </div>
       </React.Fragment>
     );
   }
@@ -196,7 +213,6 @@ class IndexPage extends React.Component {
   render () {
     return (
       <React.Fragment>
-        { this.renderTodoForm() }
         { this.renderTodoList() }
       </React.Fragment>
     );
