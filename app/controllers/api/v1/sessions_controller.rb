@@ -41,7 +41,7 @@ class Api::V1::SessionsController < ApplicationController
       token = Utils::JasonWebToken.encode({ email: user.email, api_authentication_token: user.api_authentication_token })
       render json: { access_token: token, user: user_details(user) }, status: :created
     else
-      render json: { message: "Unauthorized" }, status: :unauthorized
+      render json: { message: "Invalid email or password" }, status: :unprocessable_entity
     end
   end
 

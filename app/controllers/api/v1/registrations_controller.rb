@@ -3,7 +3,7 @@ class Api::V1::RegistrationsController < ApplicationController
   protect_from_forgery with: :exception, unless: -> { request.format.json? }
 
   rescue_from ActiveRecord::RecordInvalid do |exception|
-    render json: { message: exception.to_s }, status: :bad_request
+    render json: { message: "Record Invalid", errors: exception.record.errors.full_messages, fields_with_errors: exception.record.errors }, status: :unprocessable_entity
   end
 
   def create

@@ -10,6 +10,8 @@ class SigninPage extends React.Component {
     super(props);
 
     this.state = {
+      error_message: '',
+
       email: '',
       password: ''
     }
@@ -33,6 +35,11 @@ class SigninPage extends React.Component {
         cookies.set('access_token', access_token);
         signin(user, access_token);
         history.replace(from);
+      })
+      .catch((error) => {
+        console.log('error = ', error.response);
+        console.log('message = ', error.response.data.message);
+        this.setState({ error_message: error.response.data.message })
       });
   }
 
@@ -47,16 +54,26 @@ class SigninPage extends React.Component {
   }
 
   render () {
-    const { email, password } = this.state;
+    const { email, error_message, password } = this.state;
     const { is_signed_in } = this.props;
 
     return (
       <React.Fragment>
         { is_signed_in ? (<Redirect to={{ pathname: '/' }} />) : '' }
-        <div className="container">
+        <div className="container" style={{ marginTop: '100px' }}>
           <div className="row">
-            <div className="col-lg-4 offset-lg-4" style={{ marginTop: '50px' }}>
+            <div className="col-lg-6 offset-lg-3">
               <img src="//ssl.gstatic.com/accounts/ui/avatar_2x.png" className="mx-auto d-block rounded-circle" width="100" style={{ marginBottom: '20px' }} />
+              {
+                _.isEmpty(error_message) ? '' : (
+                  <div className="alert alert-danger alert-dismissible fade show text-center" role="alert">
+                    {error_message}
+                  </div>
+                )
+              }
+            </div>
+
+            <div className="col-lg-4 offset-lg-4">
               <form onSubmit={ this.handleSignin.bind(this) }>
                 <div className="form-group">
                   <input type="email" name="email" className="form-control" placeholder="Email" onChange={ this.handleInputChange.bind(this) } value={email} />

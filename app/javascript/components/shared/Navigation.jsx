@@ -62,7 +62,7 @@ class Navigation extends React.Component {
 
     return (
       <React.Fragment>
-        <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+        <nav className="navbar navbar-expand-lg navbar-dark bg-dark" style={{ marginBottom: '30px' }}>
           <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false" aria-label="Toggle navigation">
             <span className="navbar-toggler-icon"></span>
           </button>
@@ -79,11 +79,7 @@ class Navigation extends React.Component {
 
             <ul className="navbar-nav">
               {
-                is_signed_in ? (
-                  <li>
-                    <Link to="#" className="nav-link" onClick={this.signout.bind(this)}>Signout</Link>
-                  </li>
-                ) : (
+                is_signed_in ? '' : (
                   <React.Fragment>
                     <li>
                       <Link to="/signin" className="nav-link">Signin</Link>
@@ -98,11 +94,11 @@ class Navigation extends React.Component {
                 is_signed_in && !_.isEmpty(currentUser) ? (
                   <li className="nav-item dropdown">
                       <a className="nav-link dropdown-toggle" href="http://example.com" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        {currentUser.email}
+                        <i className="fas fa-user"></i>&nbsp;{currentUser.email}
                       </a>
                       <div className="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                          <a className="dropdown-item" href="#">Action</a>
-                          <a className="dropdown-item" href="#">Another action</a>
+                        <a className="dropdown-item" href="#">Profile</a>
+                        <Link to="#" className="dropdown-item" onClick={this.signout.bind(this)}>Signout</Link>
                       </div>
                   </li>
                 ) : ''

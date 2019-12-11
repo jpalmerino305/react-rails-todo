@@ -74,6 +74,11 @@ class IndexPage extends React.Component {
 
   handleCancelEdit(todo, event){
     const { ids_to_edit } = this.state;
+    if (!confirm('Are you sure?')) return false;
+
+    $(`label[for="todo-${todo.id}"]`).html(todo.name);
+    $(`#edit-field-${todo.id}`).val(todo.name);
+
     this.setState({ ids_to_edit: ids_to_edit.filter(id => id !== todo.id) });
   }
 
@@ -86,15 +91,20 @@ class IndexPage extends React.Component {
   }
 
   handleUpdate(todo, event){
+    event.preventDefault();
     const { ids_to_edit } = this.state;
     const { currentUser, updateTodo } = this.props;
 
-    let input = document.getElementById(`edit-field-${todo.id}`);
-    todo.name = input.value;
+    let $input = $(`#edit-field-${todo.id}`);
 
-    this.api.put(`/users/${currentUser.id}/todos/${todo.id}`, { todo: { name: todo.name } })
+    if (_.isEmpty($input.val())) {
+      $input.addClass('is-invalid');
+      return false;
+    }
+
+    this.api.put(`/users/${currentUser.id}/todos/${todo.id}`, { todo: { name: $input.val() } })
       .then((response) => {
-        updateTodo(todo);
+        updateTodo(response.data);
         this.setState({
           ids_to_edit: ids_to_edit.filter(id => id !== todo.id)
         })
@@ -166,12 +176,14 @@ class IndexPage extends React.Component {
                             <td>
                               {
                                 ids_to_edit.includes(todo.id) ? (
-                                  <React.Fragment>
-                                    <input type="text" className="form-control" id={`edit-field-${todo.id}`} defaultValue={todo.name} style={{ marginBottom: '5px' }} />
-                                    <button className="btn btn-outline-success btn-sm" onClick={this.handleUpdate.bind(this, todo)}>Save</button>
+                                  <form onSubmit={this.handleUpdate.bind(this, todo)}>
+                                    <div className="form-group has-error">
+                                      <input type="text" className="form-control" id={`edit-field-${todo.id}`} defaultValue={todo.name} style={{ marginBottom: '5px' }} />
+                                    </div>
+                                    <button type="submit" className="btn btn-outline-success btn-sm">Save</button>
                                     &nbsp;
-                                    <button className="btn btn-outline-secondary btn-sm" onClick={this.handleCancelEdit.bind(this, todo)}>Cancel</button>
-                                  </React.Fragment>
+                                    <button type="button" className="btn btn-outline-secondary btn-sm" onClick={this.handleCancelEdit.bind(this, todo)}>Cancel</button>
+                                  </form>
                                 ) : (
                                   <label htmlFor={`todo-${todo.id}`} className={ todo.completed ? styles.completed : '' }>{todo.name}</label>
                                 )

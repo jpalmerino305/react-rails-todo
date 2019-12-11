@@ -10,6 +10,8 @@ class SignupPage extends React.Component {
     super(props);
 
     this.state = {
+      errors: [],
+
       email: '',
       password: '',
       password_confirmation: ''
@@ -36,7 +38,7 @@ class SignupPage extends React.Component {
         history.replace(from);
       })
       .catch((error) => {
-        console.log('error = ', error.response)
+        this.setState({ errors: error.response.data.errors })
       });
   }
 
@@ -51,16 +53,30 @@ class SignupPage extends React.Component {
   }
 
   render () {
-    const { email, password, password_confirmation } = this.state;
+    const { email, errors, password, password_confirmation } = this.state;
     const { is_signed_in } = this.props;
 
     return (
       <React.Fragment>
         { is_signed_in ? (<Redirect to={{ pathname: '/' }} />) : '' }
-        <div className="container">
+        <div className="container" style={{ marginTop: '100px' }}>
           <div className="row">
-            <div className="col-lg-4 offset-lg-4" style={{ marginTop: '50px' }}>
+            <div className="col-lg-8 offset-lg-2">
               <img src="//ssl.gstatic.com/accounts/ui/avatar_2x.png" className="mx-auto d-block rounded-circle" width="100" style={{ marginBottom: '20px' }} />
+              {
+                _.isEmpty(errors) ? '' : (
+                  <div className="alert alert-danger alert-dismissible fade show" role="alert">
+                    <ul>
+                      { errors.map((error, index) => <li key={index}>{ error }</li>) }
+                    </ul>
+                  </div>
+                )
+              }
+            </div>
+          </div>
+
+          <div className="row">
+            <div className="col-lg-4 offset-lg-4">
               <form onSubmit={ this.handleSignup.bind(this) }>
                 <div className="form-group">
                   <input type="email" name="email" className="form-control" placeholder="Email" onChange={ this.handleInputChange.bind(this) } value={email} />
