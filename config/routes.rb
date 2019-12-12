@@ -9,6 +9,9 @@ Rails.application.routes.draw do
       resources :sessions, only: [:index, :create]
       resources :users do
         resources :todos
+        collection do
+          put :profile
+        end
       end
     end
   end

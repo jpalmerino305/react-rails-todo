@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
+import { withCookies, Cookies } from 'react-cookie';
 import Modal from 'react-bootstrap/Modal';
 
 class ProfilePage extends React.Component {
@@ -8,10 +9,12 @@ class ProfilePage extends React.Component {
   constructor(props) {
     super(props);
 
+    this.api = this.axiosApiV1Instance();
+
     this.change_password_state = {
-      old_password: '',
-      new_password: '',
-      new_password_confirmation: ''
+      current_password: '',
+      password: '',
+      password_confirmation: ''
     }
 
     this.change_email_state = {
@@ -32,6 +35,41 @@ class ProfilePage extends React.Component {
 
   componentDidMount(){
     console.log('%c=== Mounted: components/pages/sessions/ProfilePage ===', 'color: green; font-weight: bold;');
+  }
+
+  axiosApiV1Instance() {
+    const { cookies, signout } = this.props;
+
+    let api = axios.create({
+      baseURL: '/api/v1',
+      timeout: 1000,
+      headers: { 'Authorization': 'Bearer ' + cookies.get('access_token') }
+    });
+
+    api.interceptors.response.use((response) => {
+        return response;
+      }, (error) => {
+        let status = error.response.status;
+
+        if (status === 401) {
+          signout();
+          cookies.remove('access_token');
+        }
+
+        return Promise.reject(error);
+      });
+
+    return api;
+  }
+
+  handleInputChange(event) {
+    const target = event.target;
+    const name = target.name;
+    const value = target.value;
+
+    this.setState({
+      [name]: value
+    });
   }
 
   renderChangeEmail() {
@@ -64,8 +102,22 @@ class ProfilePage extends React.Component {
     );
   }
 
+  changePassword(event) {
+    event.preventDefault();
+    const { current_password, password, password_confirmation } = this.state;
+    const user = {
+      current_password: current_password,
+      password: password,
+      password_confirmation: password_confirmation,
+    }
+
+    console.log('user = ', user);
+    
+    // this.api.put('/users/profile', { user: user }).then((response) => { updateCurrentUser(user) });
+  }
+
   renderChangePassword() {
-    const { show_change_password_modal } = this.state;
+    const { current_password, password, password_confirmation, show_change_password_modal } = this.state;
 
     return (
       <Modal show={show_change_password_modal} onHide={()=>{}}>
@@ -73,19 +125,19 @@ class ProfilePage extends React.Component {
           <Modal.Title>Change Password</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <form>
+          <form onSubmit={this.changePassword.bind(this)}>
             <div className="form-group">
               <label htmlFor="email">Old Password</label>
-              <input type="password" name="old_password" className="form-control" />
+              <input type="password" name="current_password" className="form-control"onChange={ this.handleInputChange.bind(this) } value={current_password} />
             </div>
             <hr />
             <div className="form-group">
               <label htmlFor="email">New Password</label>
-              <input type="password" name="new_password" className="form-control" />
+              <input type="password" name="password" className="form-control"onChange={ this.handleInputChange.bind(this) } value={password} />
             </div>
             <div className="form-group">
               <label htmlFor="email">Confirm Password</label>
-              <input type="password" name="new_password_confirmation" className="form-control" />
+              <input type="password" name="password_confirmation" className="form-control"onChange={ this.handleInputChange.bind(this) } value={password_confirmation} />
             </div>
           </form>
         </Modal.Body>
@@ -150,7 +202,8 @@ class ProfilePage extends React.Component {
 }
 
 ProfilePage.propTypes = {
+  cookies: PropTypes.instanceOf(Cookies).isRequired,
   currentUser: PropTypes.object.isRequired
 };
 
-export default ProfilePage;
+export default withCookies(ProfilePage);
