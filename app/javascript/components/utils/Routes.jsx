@@ -18,6 +18,7 @@ import HomePage from '../pages/home/IndexPage';
 import TodosPage from '../pages/todos/IndexPageContainer';
 import SigninPage from '../pages/users/SigninPageContainer';
 import SignupPage from '../pages/users/SignupPageContainer';
+import ProfilePage from '../pages/users/ProfilePageContainer';
 
 class Routes extends React.Component {
 
@@ -35,6 +36,9 @@ class Routes extends React.Component {
           <Switch>
             <ProtectedRoute path="/todos">
               <TodosPage />
+            </ProtectedRoute>
+            <ProtectedRoute path="/profile">
+              <ProfilePage />
             </ProtectedRoute>
 
             <Route path="/signin">

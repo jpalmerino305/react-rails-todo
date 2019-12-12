@@ -18,45 +18,6 @@ class Navigation extends React.Component {
     cookies.remove('access_token');
   }
 
-  render2 () {
-    const { currentUser, is_signed_in } = this.props;
-
-    return (
-      <React.Fragment>
-        {
-          is_signed_in && !_.isEmpty(currentUser) ? (
-            <div style={{ color: 'green' }}>Welcome <b>{currentUser.email}</b>!</div>
-          ) : ''
-        }
-
-        <ul>
-          <li>
-            <Link to="/">Home</Link>
-          </li>
-          <li>
-            <Link to="/todos">Todos</Link>
-          </li>
-          {
-            is_signed_in ? (
-              <li>
-                <Link to="#" onClick={this.signout.bind(this)}>Signout</Link>
-              </li>
-            ) : (
-              <React.Fragment>
-                <li>
-                  <Link to="/signin">Signin</Link>
-                </li>
-                <li>
-                  <Link to="/signup">Signup</Link>
-                </li>
-              </React.Fragment>
-            )
-          }
-        </ul>
-      </React.Fragment>
-    );
-  }
-
   render () {
     const { currentUser, is_signed_in } = this.props;
 
@@ -82,10 +43,10 @@ class Navigation extends React.Component {
                 is_signed_in ? '' : (
                   <React.Fragment>
                     <li>
-                      <Link to="/signin" className="nav-link">Signin</Link>
+                      <Link to="/signin" className="nav-link"><i className="fas fa-user"></i>&nbsp;Signin</Link>
                     </li>
                     <li>
-                      <Link to="/signup" className="nav-link">Signup</Link>
+                      <Link to="/signup" className="nav-link"><i className="fas fa-user-plus"></i>&nbsp;Signup</Link>
                     </li>
                   </React.Fragment>
                 )
@@ -97,7 +58,7 @@ class Navigation extends React.Component {
                         <i className="fas fa-user"></i>&nbsp;{currentUser.email}
                       </a>
                       <div className="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                        <a className="dropdown-item" href="#">Profile</a>
+                        <Link to="/profile" className="dropdown-item">Profile</Link>
                         <Link to="#" className="dropdown-item" onClick={this.signout.bind(this)}>Signout</Link>
                       </div>
                   </li>
