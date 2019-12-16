@@ -8,6 +8,7 @@ const mapStateToProps = (state) => ({
 });
 
 const mapDispatchToProps = (dispatch) => ({
+  updateCurrentUser: (user) => dispatch(authActions.update(user))
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(ProfilePage);

@@ -8,3 +8,8 @@ export const signin = (user, access_token) => (dispatch) => {
 export const signout = () => (dispatch) => {
   dispatch({ type: actionTypes.SIGNOUT, payload: null });
 };
+
+
+export const update = (user) => (dispatch) => {
+  dispatch({ type: actionTypes.UPDATE, payload: user });
+};

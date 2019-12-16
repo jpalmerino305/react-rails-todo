@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import axios from 'axios';
 import { withCookies, Cookies } from 'react-cookie';
 import Modal from 'react-bootstrap/Modal';
+import ChangeEmailModal from './ChangeEmailModalComponent';
 
 class ProfilePage extends React.Component {
 
@@ -98,11 +99,11 @@ class ProfilePage extends React.Component {
               <input type="text" name="new_email" className="form-control" placeholder="New Email Address" />
             </div>
             <div className="form-group">
-              <input type="text" name="new_email_confirmation" className="form-control" placeholder="Confirm Email Address" />
+              <input type="text" name="new_email_confirmation" className="form-control" placeholder="Confirm New Email Address" />
             </div>
             <hr />
             <div className="form-group">
-              <input type="password" name="password" className="form-control" placeholder="Password" onChange={this.handleInputChange.bind(this)} />
+              <input type="password" name="password" className="form-control" placeholder="Enter Your Password" onChange={this.handleInputChange.bind(this)} />
             </div>
           </form>
         </Modal.Body>
@@ -114,9 +115,9 @@ class ProfilePage extends React.Component {
     );
   }
 
-  // changePassword() {
   changePassword(event) {
     event.preventDefault();
+
     const { current_password, password, password_confirmation } = this.state;
     const user = {
       current_password: current_password,
@@ -141,10 +142,6 @@ class ProfilePage extends React.Component {
     if (_.isEmpty(ref_password_confirmation.value)) {
       errors.push('Password confirmation can\'t be blank');
     }
-
-    console.log('ref_current_password = ', this.ref_current_password.current.value);
-    console.log('user = ', user);
-    console.log('errors = ', errors);
 
     if (!_.isEmpty(errors)) {
       this.setState({ password_change_errors: errors });
@@ -222,16 +219,32 @@ class ProfilePage extends React.Component {
   modalEditForm(opts, event) {
     event.preventDefault();
     if (opts.type == this.type_profile) {
-      this.setState({ show_change_email_modal: opts.show });
+      this.setState({ show_change_email_modal: true });
+      console.log('opts = ', opts)
     } else if (opts.type == this.type_password) {
       this.setState({ password_change_errors: [], show_change_password_modal: opts.show });
     }
   }
 
+  updateCurrentUser(user) {
+    this.props.updateCurrentUser(user);
+  }
+
   render () {
+    const { currentUser, updateCurrentUser } = this.props;
+    const { show_change_email_modal } = this.state;
+
     return (
       <React.Fragment>
-        {this.renderChangeEmail()}
+
+        <ChangeEmailModal
+          show={show_change_email_modal}
+          currentUser={currentUser}
+          onClose={() => this.setState({ show_change_email_modal: false })}
+          updateCurrentUser={this.updateCurrentUser.bind(this)}
+          api={this.api}
+        />
+
         {this.renderChangePassword()}
 
         <div className="container" style={{ marginTop: '100px' }}>
@@ -247,9 +260,12 @@ class ProfilePage extends React.Component {
                 <tbody>
                   <tr>
                     <td>Email</td>
-                    <td>jp.almerino305@gmail.com</td>
+                    <td>{currentUser.email}</td>
                     <td>
-                      <a href="#" onClick={this.modalEditForm.bind(this, { type: this.type_profile, show: true })}><i className="fas fa-pencil-alt"></i></a>
+                      <a href="#" onClick={(event)=> {
+                        this.setState({ show_change_email_modal: true });
+                        event.preventDefault();
+                      } }><i className="fas fa-pencil-alt"></i></a>
                     </td>
                   </tr>
                   <tr>
@@ -273,7 +289,8 @@ class ProfilePage extends React.Component {
 
 ProfilePage.propTypes = {
   cookies: PropTypes.instanceOf(Cookies).isRequired,
-  currentUser: PropTypes.object.isRequired
+  currentUser: PropTypes.object.isRequired,
+  updateCurrentUser: PropTypes.func.isRequired
 };
 
 export default withCookies(ProfilePage);

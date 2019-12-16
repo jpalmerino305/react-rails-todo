@@ -10,7 +10,7 @@ Rails.application.routes.draw do
       resources :users do
         resources :todos
         collection do
-          put :profile
+          put :update_profile
         end
       end
     end
