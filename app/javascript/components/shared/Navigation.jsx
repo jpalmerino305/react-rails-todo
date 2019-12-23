@@ -23,36 +23,51 @@ class Navigation extends React.Component {
 
     return (
       <React.Fragment>
-        {
-          is_signed_in && !_.isEmpty(currentUser) ? (
-            <div style={{ color: 'green' }}>Welcome <b>{currentUser.email}</b>!</div>
-          ) : ''
-        }
+        <nav className="navbar navbar-expand-lg navbar-dark bg-dark" style={{ marginBottom: '30px' }}>
+          <button className="navbar-toggler" type="button" data-toggle="collapse" data-target="#main-navbar" aria-controls="main-navbar" aria-expanded="false" aria-label="Toggle navigation">
+            <span className="navbar-toggler-icon"></span>
+          </button>
 
-        <ul>
-          <li>
-            <Link to="/">Home</Link>
-          </li>
-          <li>
-            <Link to="/todos">Todos</Link>
-          </li>
-          {
-            is_signed_in ? (
+          <div className="collapse navbar-collapse" id="main-navbar">
+            <ul className="navbar-nav mr-auto">
               <li>
-                <Link to="#" onClick={this.signout.bind(this)}>Signout</Link>
+                <Link to="/" className="nav-link">Home</Link>
               </li>
-            ) : (
-              <React.Fragment>
-                <li>
-                  <Link to="/signin">Signin</Link>
-                </li>
-                <li>
-                  <Link to="/signup">Signup</Link>
-                </li>
-              </React.Fragment>
-            )
-          }
-        </ul>
+              <li>
+                <Link to="/todos" className="nav-link">Todos</Link>
+              </li>
+            </ul>
+
+            <ul className="navbar-nav">
+              {
+                is_signed_in ? '' : (
+                  <React.Fragment>
+                    <li>
+                      <Link to="/signin" className="nav-link"><i className="fas fa-user"></i>&nbsp;Signin</Link>
+                    </li>
+                    <li>
+                      <Link to="/signup" className="nav-link"><i className="fas fa-user-plus"></i>&nbsp;Signup</Link>
+                    </li>
+                  </React.Fragment>
+                )
+              }
+              {
+                is_signed_in && !_.isEmpty(currentUser) ? (
+                  <li className="nav-item dropdown">
+                      <a className="nav-link dropdown-toggle" href="http://example.com" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i className="fas fa-user"></i>&nbsp;{currentUser.email}
+                      </a>
+                      <div className="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                        <Link to="/profile" className="dropdown-item">Profile</Link>
+                        <Link to="#" className="dropdown-item" onClick={this.signout.bind(this)}>Signout</Link>
+                      </div>
+                  </li>
+                ) : ''
+              }
+            </ul>
+          </div>
+        </nav>
+
       </React.Fragment>
     );
   }

@@ -10,69 +10,23 @@ import { withCookies, Cookies } from 'react-cookie';
 import axios from 'axios';
 import _ from 'lodash';
 
+import ProtectedRoute from './ProtectedRouteContainer';
+
 import Navigation from '../shared/NavigationContainer';
 
 import HomePage from '../pages/home/IndexPage';
 import TodosPage from '../pages/todos/IndexPageContainer';
 import SigninPage from '../pages/users/SigninPageContainer';
 import SignupPage from '../pages/users/SignupPageContainer';
+import ProfilePage from '../pages/users/ProfilePageContainer';
 
 class Routes extends React.Component {
 
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      is_signed_in: false
-    };
-  }
-
   componentDidMount() {
     console.log('%c=== Mounted: components/utils/Routes ===', 'color: green; font-weight: bold;');
-
-    const { cookies, signin } = this.props;
-    const access_token = cookies.get('access_token');
-
-    if (!_.isEmpty(access_token)) {
-      axios.get(`/api/v1/sessions?access_type=verify&access_token=${access_token}`)
-        .then((response) => {
-          signin(response.data.user, access_token);
-        })
-        .catch((error) => {
-          this.handleSignout();
-        });
-    }
-  }
-
-  handleSignout() {
-    const { cookies, signout } = this.props;
-    signout();
-    cookies.remove('access_token');
-  }
-
-  // A wrapper for <Route> that redirects to the signin
-  // screen if you're not yet authenticated.
-  privateRoute({ children, ...rest }) {
-    const { cookies, is_signed_in } = this.props;
-    const access_token = cookies.get('access_token');
-
-    return (
-      <Route
-        { ...rest }
-        render={({ location }) =>
-          !_.isEmpty(access_token) || is_signed_in ? (
-            children
-          ) : (
-            <Redirect to={{ pathname: '/signin', state: { from: location } }} />
-          )
-        }
-      />
-    );
   }
 
   render () {
-    const PrivateRoute = this.privateRoute.bind(this);
-
     return (
       <Router>
         <div>
@@ -80,9 +34,12 @@ class Routes extends React.Component {
           <Navigation />
 
           <Switch>
-            <PrivateRoute path="/todos">
+            <ProtectedRoute path="/todos">
               <TodosPage />
-            </PrivateRoute>
+            </ProtectedRoute>
+            <ProtectedRoute path="/profile">
+              <ProfilePage />
+            </ProtectedRoute>
 
             <Route path="/signin">
               <SigninPage />
