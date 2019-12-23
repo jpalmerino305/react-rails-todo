@@ -11,16 +11,14 @@ class ChangeEmailModalComponent extends React.Component {
 
     this.ref_form = React.createRef();
     this.ref_email = React.createRef();
-    this.ref_email_confirmation = React.createRef();
-    this.ref_password = React.createRef();
+    this.ref_current_password = React.createRef();
 
     this.state = {
       loading: false,
       errors: [],
 
       email: '',
-      email_confirmation: '',
-      password: '',
+      current_password: '',
 
       currentUser: props.currentUser
     };
@@ -42,8 +40,8 @@ class ChangeEmailModalComponent extends React.Component {
 
   update(event) {
     event.preventDefault();
-    const { email, email_confirmation, password } = this.state;
-    const { api, updateCurrentUser } = this.props;
+    const { email, current_password } = this.state;
+    const { api, cookies, onClose, updateCurrentUser } = this.props;
 
     let errors = [];
 
@@ -51,11 +49,7 @@ class ChangeEmailModalComponent extends React.Component {
       errors.push('New email can\'t be blank');
     }
 
-    if (_.isEmpty(email_confirmation)) {
-      errors.push('New email confirmation can\'t be blank');
-    }
-
-    if (_.isEmpty(password)) {
+    if (_.isEmpty(current_password)) {
       errors.push('Password can\'t be blank');
     }
 
@@ -64,34 +58,31 @@ class ChangeEmailModalComponent extends React.Component {
       return false;
     }
 
-    // updateCurrentUser({ email: email });
-
     const user = {
       email: email,
-      email_confirmation: email_confirmation,
-      password: password
+      current_password: current_password
     }
 
     this.setState({ loading: true });
     api.put('/users/update_profile', { update_type: 'email', user: user })
-      .then((response) => { updateCurrentUser({ email: response.data.user.email }) })
+      .then((response) => {
+        const access_token = response.data.access_token;
+        cookies.set('access_token', access_token);
+        updateCurrentUser({ email: response.data.user.email, access_token: access_token });
+        this.setState({ errors: [], email: '', current_password: '' });
+        onClose();
+      })
       .catch((error) => {
-        console.log('error.response = ', error.response)
         const errors = error.response.data.errors;
-        // this.setState({ errors: errors });
+        this.setState({ errors: errors });
       })
       .finally(() => {
-        this.setState({
-          loading: false,
-          // email: '',
-          // email_confirmation: '',
-          // password: '',
-        });
+        this.setState({ loading: false });
       });
   }
 
   render () {
-    const { email, email_confirmation, errors, loading, password } = this.state;
+    const { email, errors, loading, current_password } = this.state;
     const { currentUser, onClose, updateCurrentUser, show } = this.props;
 
     return (
@@ -116,12 +107,9 @@ class ChangeEmailModalComponent extends React.Component {
             <div className="form-group">
               <input type="text" name="email" className="form-control" placeholder="New Email Address" ref={this.ref_email} onChange={this.handleInputChange.bind(this)} value={email} disabled={loading} />
             </div>
-            <div className="form-group">
-              <input type="text" name="email_confirmation" className="form-control" placeholder="Confirm New Email Address" ref={this.ref_email_confirmation} onChange={this.handleInputChange.bind(this)} value={email_confirmation} disabled={loading} />
-            </div>
             <hr />
             <div className="form-group">
-              <input type="password" name="password" className="form-control" placeholder="Enter Your Password" ref={this.ref_password} onChange={this.handleInputChange.bind(this)} value={password} disabled={loading} />
+              <input type="password" name="current_password" className="form-control" placeholder="Enter Your Password" onChange={this.handleInputChange.bind(this)} value={current_password} disabled={loading} />
             </div>
           </form>
         </Modal.Body>

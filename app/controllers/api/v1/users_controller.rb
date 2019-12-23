@@ -10,43 +10,30 @@ class Api::V1::UsersController < Api::V1::SecuredController
     render json: { message: exception.to_s }, status: :unprocessable_entity
   end
 
-  rescue_from Exceptions::InvalidApiParameterError do |exception|
-    render json: { message: exception.to_s }, status: :unprocessable_entity
-  end
 
   def update_profile
     update_type = params[:update_type]
 
+    token = nil
+
     if update_type == "email"
-      email = user_params.fetch(:email, "")
-      email_confirmation = user_params.fetch(:email_confirmation, "")
-      password = user_params.fetch(:password, "")
-
-      puts "email = #{email}"
-      puts "email_confirmation = #{email_confirmation}"
-      puts "password = #{password}"
-
-      raise Exceptions::InvalidApiParameterError.new "Email and email confirmation are required" and return if email.blank? || email_confirmation.blank?
-      raise Exceptions::InvalidApiParameterError.new "Email and email confirmation must match" and return if email.downcase != email_confirmation.downcase
-      raise Exceptions::InvalidApiParameterError.new "Invalid password" and return unless current_user.valid_password?(password)
-
-      current_user.email = email
-      current_user.save!
-
+      updated = current_user.update_with_password user_params.slice(:email, :current_password)
+      raise ActiveRecord::RecordInvalid.new current_user and return unless updated
+      token = Utils::JasonWebToken.encode({ email: current_user.email, api_authentication_token: current_user.api_authentication_token })
     elsif update_type == "password"
-      current_user.update_with_password user_params.slice(:password, :current_password, :password_confirmation)
-      raise ActiveRecord::RecordInvalid.new current_user and return
+      updated = current_user.update_with_password user_params.slice(:password, :current_password, :password_confirmation)
+      raise ActiveRecord::RecordInvalid.new current_user and return unless updated
     else
       raise NotImplementedError.new and return
     end
 
-    render json: { user: current_user.as_json(only: [:id, :email]) }
+    render json: { user: current_user.as_json(only: [:id, :email]), access_token: token }
   end
 
   private
 
   def user_params
-    params.require(:user).permit(:email, :password, :current_password, :password_confirmation, :email, :email_confirmation)
+    params.require(:user).permit(:email, :password, :current_password, :password_confirmation, :email)
   end
 
 end
