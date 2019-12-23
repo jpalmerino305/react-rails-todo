@@ -4,6 +4,7 @@ import axios from 'axios';
 import { withCookies, Cookies } from 'react-cookie';
 import Modal from 'react-bootstrap/Modal';
 import ChangeEmailModal from './ChangeEmailModalComponent';
+import ChangePasswordModal from './ChangePasswordModalComponent';
 
 class ProfilePage extends React.Component {
 
@@ -11,39 +12,12 @@ class ProfilePage extends React.Component {
     super(props);
 
     this.api = this.axiosApiV1Instance();
+    this.updateCurrentUser = this.updateCurrentUser.bind(this);
 
-    this.changePasswordForm = React.createRef();
-    this.ref_current_password = React.createRef();
-    this.ref_password = React.createRef();
-    this.ref_password_confirmation = React.createRef();
-
-    this.change_password_state = {
-      current_password: '',
-      password: '',
-      password_confirmation: ''
-    }
-
-    this.change_email_state = {
-      new_email: '',
-      new_email_confirmation: ''
-    }
-
-    const state = {
-      password_change_loading: false,
-      password_change_errors: [],
-
+    this.state = {
       show_change_email_modal: false,
-      show_change_password_modal: false,
-    }
-
-    this.state = { ...state, ...this.change_password_state, ...this.change_email_state };
-
-    this.type_profile = 'profile_information';
-    this.type_password = 'password_change';
-  }
-
-  componentDidMount(){
-    console.log('%c=== Mounted: components/pages/sessions/ProfilePage ===', 'color: green; font-weight: bold;');
+      show_change_password_modal: false
+    };
   }
 
   axiosApiV1Instance() {
@@ -71,181 +45,31 @@ class ProfilePage extends React.Component {
     return api;
   }
 
-  handleInputChange(event) {
-    const target = event.target;
-    const name = target.name;
-    const value = target.value;
-
-    this.setState({
-      [name]: value
-    });
-  }
-
-  renderChangeEmail() {
-    const { show_change_email_modal } = this.state;
-    const { currentUser } = this.props;
-
-    return (
-      <Modal show={show_change_email_modal} onHide={()=>{}}>
-        <Modal.Header>
-          <Modal.Title>Change Email Address</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <form>
-            <div className="form-group">
-              <div className="font-weight-bold text-center" style={{ marginBottom: '20px' }}>{currentUser.email}</div>
-            </div>
-            <div className="form-group">
-              <input type="text" name="new_email" className="form-control" placeholder="New Email Address" />
-            </div>
-            <div className="form-group">
-              <input type="text" name="new_email_confirmation" className="form-control" placeholder="Confirm New Email Address" />
-            </div>
-            <hr />
-            <div className="form-group">
-              <input type="password" name="password" className="form-control" placeholder="Enter Your Password" onChange={this.handleInputChange.bind(this)} />
-            </div>
-          </form>
-        </Modal.Body>
-        <Modal.Footer>
-          <button className="btn btn-secondary" onClick={this.modalEditForm.bind(this, { type: this.type_profile, show: false })}>Close</button>
-          <button className="btn btn-success">Save Changes</button>
-        </Modal.Footer>
-      </Modal>
-    );
-  }
-
-  changePassword(event) {
-    event.preventDefault();
-
-    const { current_password, password, password_confirmation } = this.state;
-    const user = {
-      current_password: current_password,
-      password: password,
-      password_confirmation: password_confirmation,
-    }
-
-    const ref_current_password = this.ref_current_password.current;
-    const ref_password = this.ref_password.current;
-    const ref_password_confirmation = this.ref_password_confirmation.current;
-
-    let errors = [];
-
-    if (_.isEmpty(ref_current_password.value)) {
-      errors.push('Current Password can\'t be blank');
-    }
-
-    if (_.isEmpty(ref_password.value)) {
-      errors.push('Password can\'t be blank');
-    }
-
-    if (_.isEmpty(ref_password_confirmation.value)) {
-      errors.push('Password confirmation can\'t be blank');
-    }
-
-    if (!_.isEmpty(errors)) {
-      this.setState({ password_change_errors: errors });
-      return false;
-    }
-
-    this.setState({ password_change_loading: true });
-    this.api.put('/users/profile', { update_type: 'password', user: user })
-      .then((response) => { console.log('sucess response = ', response) })
-      .catch((error) => {
-        const errors = error.response.data.errors;
-        this.setState({ password_change_errors: errors });
-      })
-      .finally(() => {
-        this.setState({
-          password_change_loading: false,
-          current_password: '',
-          password: '',
-          password_confirmation: '',
-        });
-      });
-  }
-
-  saveChanges(type){
-    if (type == this.type_profile) {
-    } else if (type == this.type_password) {
-      this.changePasswordForm.current.dispatchEvent(new Event('submit'));
-    } else {
-      throw `NotImplemented: ${type}`
-    }
-  }
-
-  renderChangePassword() {
-    const { current_password, password_change_loading, password, password_confirmation, password_change_errors, show_change_password_modal } = this.state;
-
-    return (
-      <Modal show={show_change_password_modal} onHide={()=>{}}>
-        <Modal.Header>
-          <Modal.Title>Change Password</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {
-            _.isEmpty(password_change_errors) ? '' : (
-              <div className="alert alert-danger alert-dismissible fade show" role="alert">
-                <ul>
-                  { password_change_errors.map((error, index) => <li key={index}>{error}</li>) }
-                </ul>
-              </div>
-            )
-          }
-          <form onSubmit={this.changePassword.bind(this)} ref={this.changePasswordForm}>
-            <div className="form-group">
-              <label htmlFor="email">Old Password</label>
-              <input type="password" name="current_password" className="form-control" ref={this.ref_current_password} onChange={this.handleInputChange.bind(this)} value={current_password} disabled={password_change_loading} />
-            </div>
-            <hr />
-            <div className="form-group">
-              <label htmlFor="email">New Password</label>
-              <input type="password" name="password" className="form-control" ref={this.ref_password} onChange={this.handleInputChange.bind(this)} value={password} disabled={password_change_loading} />
-            </div>
-            <div className="form-group">
-              <label htmlFor="email">Confirm Password</label>
-              <input type="password" name="password_confirmation" className="form-control" ref={this.ref_password_confirmation} onChange={this.handleInputChange.bind(this)} value={password_confirmation} disabled={password_change_loading} />
-            </div>
-          </form>
-        </Modal.Body>
-        <Modal.Footer>
-          <button className="btn btn-secondary" onClick={this.modalEditForm.bind(this, { type: this.type_password, show: false })} disabled={password_change_loading}>Close</button>
-          <button className="btn btn-success" onClick={ this.saveChanges.bind(this, this.type_password) } disabled={password_change_loading}>Save Changes</button>
-        </Modal.Footer>
-      </Modal>
-    );  
-  }
-
-  modalEditForm(opts, event) {
-    event.preventDefault();
-    if (opts.type == this.type_profile) {
-      this.setState({ show_change_email_modal: true });
-      console.log('opts = ', opts)
-    } else if (opts.type == this.type_password) {
-      this.setState({ password_change_errors: [], show_change_password_modal: opts.show });
-    }
-  }
-
   updateCurrentUser(user) {
     this.props.updateCurrentUser(user);
   }
 
   render () {
-    const { currentUser, updateCurrentUser } = this.props;
-    const { show_change_email_modal } = this.state;
+    const { currentUser } = this.props;
+    const { show_change_email_modal, show_change_password_modal } = this.state;
 
     return (
       <React.Fragment>
-
         <ChangeEmailModal
           show={show_change_email_modal}
           currentUser={currentUser}
           onClose={() => this.setState({ show_change_email_modal: false })}
-          updateCurrentUser={this.updateCurrentUser.bind(this)}
+          updateCurrentUser={this.updateCurrentUser}
           api={this.api}
         />
 
-        {this.renderChangePassword()}
+        <ChangePasswordModal
+          show={show_change_password_modal}
+          currentUser={currentUser}
+          onClose={() => this.setState({ show_change_password_modal: false })}
+          updateCurrentUser={this.updateCurrentUser}
+          api={this.api}
+        />
 
         <div className="container" style={{ marginTop: '100px' }}>
           <div className="row">
@@ -265,14 +89,17 @@ class ProfilePage extends React.Component {
                       <a href="#" onClick={(event)=> {
                         this.setState({ show_change_email_modal: true });
                         event.preventDefault();
-                      } }><i className="fas fa-pencil-alt"></i></a>
+                      }}><i className="fas fa-pencil-alt"></i></a>
                     </td>
                   </tr>
                   <tr>
                     <td>Password</td>
                     <td>********</td>
                     <td>
-                      <a href="#" onClick={this.modalEditForm.bind(this, { type: this.type_password, show: true })}><i className="fas fa-pencil-alt"></i></a>
+                      <a href="#" onClick={(event)=> {
+                        this.setState({ show_change_password_modal: true });
+                        event.preventDefault();
+                      }}><i className="fas fa-pencil-alt"></i></a>
                     </td>
                   </tr>
                 </tbody>
@@ -280,7 +107,6 @@ class ProfilePage extends React.Component {
             </div>
           </div>
         </div>
-
       </React.Fragment>
     );
   }
